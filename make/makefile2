@@ -1,0 +1,38 @@
+INC = -I ../header
+objects = Main.o Queue.o Stack.o
+#vpath %.c ../src/queue ../src/stack ../main
+vpath %.h ../header
+edit : $(objects)
+	@echo Linking...
+	cc -o edit $(objects)
+Main.o : Queue.h Stack.h
+	@echo Compiling...
+	cc -c ../main/Main.c $(INC)
+Queue.o : Queue.h Typedef.h
+	@echo Compiling...
+	cc -c ../src/queue/Queue.c $(INC)
+Stack.o : Stack.h
+	@echo Compiling...
+	cc -c ../src/stack/Stack.c $(INC)
+.PHONY : clean
+clean :
+	rm edit $(objects)
+
+#$(objects) : %.o : %.c
+#    @echo Compiling $< ... 
+#    cc -o $(TARGET) 
+
+#VPATH = ../src:../header
+#vpath %.h ../header
+#objects = Main.o Queue.o Stack.o
+#./edit : $(objects)
+#	cc -o edit $(objects)
+#./Main.o : Queue.h Stack.h
+#	cc -c ../main/Main.c
+#./Queue.o : Queue.h Typedef.h
+#	cc -c ../src/Queue/Queue.c
+#./Stack.o : ../header/Stack.h
+#	cc -c ../src/Stack/Stack.c
+#.PHONY : clean
+#clean :
+#	-rm edit $(objects)

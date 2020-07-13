@@ -1,0 +1,5 @@
+---- Array_Offset Matches (4 in 3 files) ----
+Main.c (e:\桌面\share\share\expertcprograming\pointersonc\new_workspace\main):offset = Array_Offset(arrayInfo, 4, 1, 3);
+ReviewProgramer.c (e:\桌面\share\share\expertcprograming\pointersonc\new_workspace\src\reviewprogramer):uint32 Array_Offset(uint32 arrayinfo[], ...)
+ReviewProgramer.c (e:\桌面\share\share\expertcprograming\pointersonc\new_workspace\src\reviewprogramer):int32 Array_Offset(int32 arrayinfo[], ...)
+ReviewProgramer.h (e:\桌面\share\share\expertcprograming\pointersonc\new_workspace\header):extern int32 Array_Offset(int32 arrayinfo[], ...);

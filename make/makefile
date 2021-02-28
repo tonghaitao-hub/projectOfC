@@ -24,8 +24,11 @@ INC = -I ../header
 TARGET = edit1
 CFLAGS = -g
 CFLAGS1 = -Wall
-objects = Main.o Queue.o Stack.o Sales.o Typedef.o Compare.o ReviewProgramer.o #Inventor.o
+objects = Main.o
+#Main.o Queue.o Stack.o Sales.o Typedef.o Compare.o ReviewProgramer.o #Inventor.o
+#add file.o
 vpath %.c ../src/queue ../src/stack ../src/sales ../src/typedef ../src/compare ../src/inventor ../src/reviewprogramer ../main
+#add file path
 #vpath %.h ../header
 $(TARGET) : $(objects)
 	@echo Linking...

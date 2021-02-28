@@ -1,4 +1,6 @@
 #pragma once
+#include "Type.h"
+
 typedef struct _pool_ent_t{
     struct _pool_ent_t *next;
 }pool_ent_t;

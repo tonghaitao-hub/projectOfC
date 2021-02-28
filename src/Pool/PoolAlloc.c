@@ -1,3 +1,5 @@
+#include "PoolAlloc.h"
+
 void *pool_get(pool_t *pool)
 {
     pool_ent_t *ent = pool->free;

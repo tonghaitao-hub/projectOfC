@@ -1,5 +1,8 @@
 #ifndef _DOUBLE_LINKED_LIST
 #define _DOUBLE_LINKED_LIST
+
+#include "Type.h"
+
 /************************************double link list**********************************/
 typedef struct _dlink_entry_t{
     struct _dlink_entry_t *prev;
@@ -51,7 +54,7 @@ void dlink_move(dlink_t *dlink_dst, dlink_t *dlink_src);
 void dlink_insert_after(dlink_entry_t *t, dlink_entry_t *entry);
 void dlink_push(dlink_t *dlink, dlink_entry_t *entry);
 void dlink_push_tail(dlink_t *dlink, dlink_entry_t *entry);
-void dlink_remove_entry(dlink_entry_t entry);
+void dlink_remove_entry(dlink_entry_t *entry);
 dlink_entry_t * dlink_pop(dlink_t *dlink);
 dlink_entry_t * dlink_peek_head(dlink_t *dlink);
 dlink_entry_t * dlink_peek_tail(dlink_t *dlink);

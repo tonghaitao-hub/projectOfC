@@ -20,14 +20,16 @@
 #	rm $(TARGET) $(objects)
 
 
+#INC = -I ../header ../header/DLink ../header/Pool ../header/SLink ../header/Thread ../header/Utils
 INC = -I ../header
-TARGET = edit1
+TARGET = testBin
 CFLAGS = -g
 CFLAGS1 = -Wall
-objects = Main.o
+objects = Main.o DLink.o SLink.o Utils.o PoolAlloc.o Test.o
 #Main.o Queue.o Stack.o Sales.o Typedef.o Compare.o ReviewProgramer.o #Inventor.o
 #add file.o
-vpath %.c ../src/queue ../src/stack ../src/sales ../src/typedef ../src/compare ../src/inventor ../src/reviewprogramer ../main
+#vpath %.c ../src/queue ../src/stack ../src/sales ../src/typedef ../src/compare ../src/inventor ../src/reviewprogramer ../main
+vpath %.c ../src/DLink ../src/Pool ../src/SLink ../src/Thread ../src/Utils ..src/Test ../main
 #add file path
 #vpath %.h ../header
 $(TARGET) : $(objects)

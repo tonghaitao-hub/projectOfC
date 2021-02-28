@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Type.h"
 /**************************single link************************/
 
 //typedef
@@ -33,11 +35,11 @@ typedef struct _slink_head_t{
     )
 
 //func declaration
-extern void slink_push_tail(slink_head_t head, slink_entry_t entry);
-extern void slink_push_head(slink_head_t head, slink_entry_t entry);
-extern void slink_remove_entry(slink_head_t head, slink_entry_t entry);
-extern slink_entry_t *slink_remove_first(slink_head_t head);
-extern slink_entry_t *slink_get_first(slink_head_t head);
+extern void slink_push_tail(slink_head_t *head, slink_entry_t *entry);
+extern void slink_push_head(slink_head_t *head, slink_entry_t *entry);
+extern void slink_remove_entry(slink_head_t *head, slink_entry_t *entry);
+extern slink_entry_t *slink_remove_first(slink_head_t *head);
+extern slink_entry_t *slink_get_first(slink_head_t *head);
 extern void slink_move(slink_head_t *dst, slink_head_t *src);
 
 

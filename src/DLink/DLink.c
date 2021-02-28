@@ -47,10 +47,10 @@ void dlink_push_tail(dlink_t *dlink, dlink_entry_t *entry)
     dlink_insert_after(dlink->head.prev, entry);
 }
 
-void dlink_remove_entry(dlink_entry_t entry)
+void dlink_remove_entry(dlink_entry_t *entry)
 {
-    dlink_entry_t _plink = entry->prev;
-    dlink_entry_t _nlink = entry->next;
+    dlink_entry_t *_plink = entry->prev;
+    dlink_entry_t *_nlink = entry->next;
     _plink->next = entry->next;
     _nlink->prev = entry->prev;
     entry->prev = NULL;

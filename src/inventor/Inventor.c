@@ -33,7 +33,7 @@ void DiscardInventorRecord(InvRec *record)
     //删除记录中的变体部分
         case PART:
             free(record->info.part);
-            break
+            break;
 
         case SUBASSY:
             free(record->info.subassy->part);
@@ -75,6 +75,7 @@ void DiscardInventorRecord1(InvRec *record)
             break;
         case PART:
             free(record->info.part);
+            break;
     }
     free(record);
 }

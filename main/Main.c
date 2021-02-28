@@ -1026,7 +1026,7 @@ printf("offset = %d\n", offset);
 /*
 55.8.8编程练习国际象棋8皇后不能互相攻击
 */
-#if 0
+#if 1
 Board_Init();
 Place_Queen(0);
 #endif

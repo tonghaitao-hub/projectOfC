@@ -24,7 +24,7 @@
 INC = -I ../header
 TARGET = testBin
 CFLAGS = -g
-CFLAGS1 = -Wall
+CFLAGS1 = -Wall -lm
 objects = Main.o DLink.o SLink.o Utils.o PoolAlloc.o Test.o
 #Main.o Queue.o Stack.o Sales.o Typedef.o Compare.o ReviewProgramer.o #Inventor.o
 #add file.o
@@ -37,7 +37,7 @@ $(TARGET) : $(objects)
 	cc -o $(TARGET) $(objects) $(CFLAGS1)
 $(objects) : %.o : %.c
 	@echo Compiling $<
-	cc -c $(CFLAGS) $(CFLAGS1) $< $(INC) -o $@
+	cc -c $(CFLAGS) $(CFLAGS1) $< $(INC) -o $@ -finput-charset=GBK
 .PHONY : clean
 clean :
 	rm $(TARGET) $(objects)

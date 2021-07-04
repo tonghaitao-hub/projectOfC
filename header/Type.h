@@ -25,4 +25,9 @@ enum {
 };
 
 #define ARRAY_SIZE(x)      (sizeof(x)/sizeof(x[0]))
-
+#define ASSERT(x)   do {                                                                     \
+                if (unlikely(!x)) {                                                          \
+                    printf("ASSERT: FILE(%s) LINE(%d)\n", __FILE__, __LINE__);    \
+                    while(1);                                                                \
+                }                                                                            \
+            } while(0)

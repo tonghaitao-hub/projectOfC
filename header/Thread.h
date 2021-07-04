@@ -21,7 +21,8 @@ typedef struct _sum_arg{
 }sum_arg;
 
 
-u32 parallel_sum(void *arg); //线程函数的原型
+extern u32 parallel_sum(void *arg); //线程函数的原型
+extern bool sum(float arr[], u32 len, double *sum_ptr);//线程求数组的和
 
 
 

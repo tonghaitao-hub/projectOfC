@@ -10,6 +10,9 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+//#include <stdbool.h>
+//#include <threads.h>//线程相关头文件
 //#include <conio.h>
 
 #define      TEMP_TEST                              0//临时借用
@@ -28,6 +31,7 @@
 #define      DAYS_IN_A_MONTH_OF_A_YEAR             1//某一年的某一月有多少天
 
 #define      PWDLEN                                 20
+#define      STRLEN                                 100//删除字符串中字母之间的星号
 
 extern u32 a[5];
 extern u32 *b;

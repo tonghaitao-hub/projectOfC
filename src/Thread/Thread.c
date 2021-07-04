@@ -4,7 +4,7 @@ bool sum(float arr[], u32 len, double *sum_ptr)
 {
     u32 block_size = len / MAX_THREADS;
     if (block_size < MIN_BLOCK_SIZE)
-        block_size = len;
+        block_size = MIN_BLOCK_SIZE;
     sum_arg args = {arr, len, block_size, 0.0};
     if (parallel_sum(&args))
     {

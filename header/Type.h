@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef NULL
-    #define NULL (void *)0
+    #define NULL ((void *)0)
 #endif
 
 
@@ -18,6 +18,7 @@ typedef unsigned char      bool;
 typedef signed char        s8;
 typedef signed short       s16;
 typedef signed int         s32;
+typedef signed long long   s64;
 
 enum {
     FALSE = 0,
@@ -27,7 +28,7 @@ enum {
 #define ARRAY_SIZE(x)      (sizeof(x)/sizeof(x[0]))
 #define ASSERT(x)   do {                                                                     \
                 if (unlikely(!x)) {                                                          \
-                    printf("ASSERT: FILE(%s) LINE(%d)\n", __FILE__, __LINE__);    \
+                    printf("ASSERT: FILE(%s) LINE(%d)\n", __FILE__, __LINE__);               \
                     while(1);                                                                \
                 }                                                                            \
             } while(0)

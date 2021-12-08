@@ -5,12 +5,17 @@
 #include "DLink.h"
 #include "Utils.h"
 #include "Test.h"
+u32 strong_weak_symbol = 40;
+void strong_weak_symb_func()
+{
+    DBGPRINTF("call func strong_weak_symb_func in main.c\n");
+}
 
-int main()
+int main(int argc, char *argv[])
 {
     DBGPRINTF("fw start\n");
     //test();//practice
-    test1();//c语言实例精讲
+    test1(argc, argv);//c语言实例精讲
     DBGPRINTF("\rfw end\n");
     return 0;
 }

@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <setjmp.h>
+#include <stdarg.h>
 //#include <stdbool.h>
 //#include <threads.h>//线程相关头文件
 //#include <conio.h>
@@ -39,5 +41,9 @@ extern u32 *b;
 extern void test();
 extern void test1();
 
-
+typedef struct _block_tbl {
+    s32 start;
+    s32 end;
+    s32 key;
+} block_tbl;
 

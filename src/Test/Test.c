@@ -1871,22 +1871,45 @@ void two_dimensional_array_test()
     print_2d_array(retry_table_b, 3);
     
 }
-void swap(u32*a, u32*b)
+void swap(s32*a, s32*b)
 {
-    u32 temp;
+    s32 temp;
     temp = *a;
     *a = *b;
     *b = temp;
 }
 //插入排序
-void insert_sort(u32 s[], u32 n)
+#if 1
+extern void print_1d_array(s32 array[], u32 row);
+void insert_sort(s32 s[], u32 n)
 {
-    u32 i,j, temp;
+    s32 i,j, temp;//这里不能定义成u32
+    for(i=1; i<n; i++)
+    {
+        temp = s[i];
+        j=i;
+        //DBGPRINTF("j = %d temp = %d\n", j, temp);
+        while(j>0 && s[j-1]>temp)//这里需要每次跟temp值比
+        {
+            //DBGPRINTF("j.%d\n", j);
+            s[j]=s[j-1];    //数据右移
+            j--;    //产移向左边一个未比较的数
+            print_1d_array(s, n);
+        }
+        s[j]=temp;    //在确定的位置插入s[i]
+        print_1d_array(s, n);
+    }
+    return;
+}
+void insert_sort_wrong(s32 s[], u32 n)//need debug
+{
+    s32 i,j;
+    s32 temp;
     for(i=1; i<=n-1; i++)    //数组下标从2开始，s[0]做监视哨，s[1]一个数据无可比性
     {
         temp = s[i];    //给监视哨陚值
         j=i-1;    //确定要比较元素的最右边位黄
-        while(temp<s[j])
+        while(j>=0 && temp<s[j])
         {
             s[j+1]=s[j];    //数据右移
             j--;    //产移向左边一个未比较的数
@@ -1896,21 +1919,44 @@ void insert_sort(u32 s[], u32 n)
     return;
 }
 
-//冒泡排序
-void bubble_sort(u32 s[], u32 n)
+#else//优化
+void insert_sort(s32 s[], u32 n)
 {
-    u32 i, j;
-    for (i = 0; i < n-1; i++) {
-        for (j = 0; j < n-1 - i; j++) {
-            if (s[j] > s[j+1]) {
-                swap(&s[j], &s[j+1]);
-            }
+    u32 i,j;
+    for(i=1; i<n; i++)
+    {
+        j=i;
+        while(j>0 && s[j-1]>s[j])
+        {
+            swap(&s[j], &s[j-1]);
+            j--;
         }
     }
 }
 
+#endif
+
+//冒泡排序
+void bubble_sort(s32 s[], u32 n)
+{
+    u32 i, j;
+    u8 flag;
+    for (i = 0; i < n-1; i++) {
+        flag = 1;//设定一个标记，若为true，则表示此次循环没有进行交换，也就是待排序列已经有序，排序已然完成
+        for (j = 0; j < n-1 - i; j++) {
+            if (s[j] > s[j+1]) {
+                swap(&s[j], &s[j+1]);
+                flag = 0;
+            }
+        }
+        if (flag == 1) 
+            break;
+    }
+}
+
 //选择排序
-void select_sort(u32 s[], u32 n)
+#if 0
+void select_sort(s32 s[], u32 n)
 {
     u32 i, j;
     for (i = 0; i < n-1; i++) {
@@ -1920,7 +1966,23 @@ void select_sort(u32 s[], u32 n)
         }
     }
 }
+#else//优化
+void select_sort(s32 s[], u32 n)
+{
+    u32 i, j, min;
+    for (i = 0; i < n-1; i++) {
+        min = i;//每一趟循环比较时，min用于存放较小元素的数组下标，这样当前批次比较完毕最终存放的就是此趟内最小的元素的下标，避免每次遇到较小元素都要进行交换。
+        for (j = i+1; j <= n-1; j++) {
+            if (s[min] > s[j])
+                min = j;
+        }
+        if (min != i) {
+            swap(&s[min], &s[i]);
+        }
+    }
+}
 
+#endif
 //快速排序
 #if 0
 void quick_sort(u32 s[], u32 start, u32 end)
@@ -1958,7 +2020,7 @@ void quick_sort(u32 s[], u32 start, u32 end)
         
 }
 #else
-void quick_sort(int *a, int left, int right)
+void quick_sort(int *a, int left, int right)//left、right是数组下标起始和结束
 {
     if(left >= right)/*如果左边索引大于或者等于右边的索引就代表已经整理完成一个组了*/
     {
@@ -2032,6 +2094,7 @@ void Merge_Sort(int sourceArr[], int tempArr[], int startIndex, int endIndex)
  
 
 //希尔排序
+#if 0
 //根据当前增量进行插入排序
 void shellInsert(int array[],int n,int dk)
 {
@@ -2053,18 +2116,135 @@ int dkHibbard(int t,int k)
 }
  
 //希尔排序
-void shellSort(int array[],int n,int t)//t为排序趟数，排序趟数应为log2(n+1)的整数部分，可取(int)(log(n+1)/log(2))，n为数组长度
+void shell_Sort(int array[],int n,int t)//t为排序趟数，排序趟数应为log2(n+1)的整数部分，可取(int)(log(n+1)/log(2))，n为数组长度
 {
     //void shellInsert(int array[],int n,int dk);
     int i;
     for(i=1;i<=t;i++)
         shellInsert(array,n,dkHibbard(t,i));
 }
+#else
+int shell_sort(int s[], int n)    /* 自定义函数 shsort()*/
+{
+    int i,j,d, temp;
+    d=n/2;    /*确定固定增虽值*/
+    while(d>=1)
+    {
+        for(i=d+1;i<n;i++)    /*数组下标从d+1开始进行直接插入排序*/
+        {
+            temp=s[i];    /*设置监视哨*/
+            j=i-d;    /*确定要进行比较的元素的最右边位置*/
+            while((j>=0)&&(temp<s[j]))
+            {
+                s[j+d]=s[j];    /*数据右移*/
+                j=j-d;    /*向左移d个位置V*/
+            }
+            s[j+d]=temp;    /*在确定的位罝插入s[i]*/
+        }
+        d = d/2;    /*增里变为原来的一半*/
+    }
+    return 0;
+}
+#endif
+
+//堆排序
+void max_heapify(int arr[], int start, int end) 
+{
+    //建立父节点指标和子节点指标
+    int dad = start;
+    int son = dad * 2 + 1;
+    while (son <= end)  //若子节点指标在范围内才做比较
+    {
+        if (son + 1 <= end && arr[son] < arr[son + 1]) 
+        //先比较两个子节点大小，选择最大的
+            son++;
+        if (arr[dad] > arr[son]) //如果父节点大於子节点代表调整完毕，直接跳出函数
+            return;
+        else  //否则交换父子内容再继续子节点和孙节点比较
+        {
+            swap(&arr[dad], &arr[son]);
+            dad = son;
+            son = dad * 2 + 1;
+        }
+    }
+}
  
+void heap_sort(int arr[], int len) 
+{
+    int i;
+    //初始化，i从最後一个父节点开始调整
+    for (i = len / 2 - 1; i >= 0; i--)
+        max_heapify(arr, i, len - 1);
+    //先将第一个元素和已排好元素前一位做交换，再重新调整，直到排序完毕
+    for (i = len - 1; i > 0; i--) 
+    {
+        swap(&arr[0], &arr[i]);
+        max_heapify(arr, 0, i - 1);
+    }
+}
+
+#define SIZE 10
+void print_1d_array(s32 array[], u32 row)
+{
+    u32 i;
+    //DBGPRINTF("ptr %p: ", array);
+    for (i = 0; i < row; i++) {
+        DBGPRINTF("%d ", array[i]);
+    }
+    DBGPRINTF("\n");
+}
 
 void sort_method_test()
 {
-
+    //int array[SIZE] = {1000, 200, 4,-1, 3,44, 39, 232, 0, 123};
+    int array[SIZE] = {2, 4, 1, 9, 6, 8, 7, 5, 3, 0};
+    int a[SIZE] = {0};//插入排序
+    int b[SIZE] = {0};//冒泡排序
+    int c[SIZE] = {0};//选择排序
+    int d[SIZE] = {0};//快速排序
+    int e[SIZE] = {0};//归并排序
+    int f[SIZE] = {0};//希尔排序
+    int g[SIZE] = {0};//堆  排序
+    int temp[SIZE] = {0};
+    memcpy(a, array, sizeof(a));
+    memcpy(b, array, sizeof(b));
+    memcpy(c, array, sizeof(c));
+    memcpy(d, array, sizeof(d));
+    memcpy(e, array, sizeof(e));
+    memcpy(f, array, sizeof(f));
+    memcpy(g, array, sizeof(g));
+    DBGPRINTF("排序前:\n");
+    print_1d_array(array, SIZE);
+    print_1d_array(a, SIZE);
+    print_1d_array(b, SIZE);
+    print_1d_array(c, SIZE);
+    print_1d_array(d, SIZE);
+    print_1d_array(e, SIZE);
+    print_1d_array(f, SIZE);
+    print_1d_array(g, SIZE);
+    print_1d_array(temp, SIZE);
+    
+    //排序
+    //insert_sort(a, SIZE);
+    insert_sort_wrong(a, SIZE);
+    bubble_sort(b, SIZE);
+    select_sort(c, SIZE);
+    quick_sort(d, 0, SIZE-1);
+    Merge_Sort(e, temp, 0, SIZE-1);
+    //shell_Sort(f, SIZE, 3);
+    shell_sort(f, SIZE);
+    heap_sort(g, SIZE);
+    DBGPRINTF("排序后:\n");
+    print_1d_array(array, SIZE);
+    print_1d_array(a, SIZE);
+    print_1d_array(b, SIZE);
+    print_1d_array(c, SIZE);
+    print_1d_array(d, SIZE);
+    print_1d_array(e, SIZE);
+    print_1d_array(f, SIZE);
+    print_1d_array(g, SIZE);
+    print_1d_array(temp, SIZE);
+    
 }
 
 void test_rand_func()
@@ -2075,28 +2255,983 @@ void test_rand_func()
     DBGPRINTF("a = %d\n", a);
 }
 
+#define STR_SIZE 300
+typedef struct _stu_t {
+    char name[10];
+    int num;
+    int age;
+    float score;
+} stu_t;
+
 void open_file_test()
 {
-    FILE *fp;
-    char ch;
+    FILE *fp = NULL;
+    
 
-    if ((fp == fopen("./testFile", "w+t")) == NULL) {
+    if ((fp = fopen("/mnt/hgfs/myProject_toGit_and_for_test_compile/projectOfC/make/tonghaitao.txt", "a+")) == NULL) {
         DBGPRINTF("===========================\n");
         puts("Fail to open file!");
         DBGPRINTF("===========================\n");
+        exit(0);
     }
+#if 0//字符形式读写文件
+    char ch;
+    puts("file content:=========================");
+    while ((ch=fgetc(fp)) != EOF) {
+        putchar(ch);
+    }
+    putchar('\n');
 
-    DBGPRINTF("Input a string\n");
+    
+    puts("Input a string=======================");
     while ((ch=getchar()) != '\n') {
         fputc(ch, fp);
     }
+#endif
+#if 0//字符串形式读写文件
+    char str[STR_SIZE] = {0};
+    u8 count = 0;
+    while(fgets(str, STR_SIZE, fp) != NULL) {
+        count++;
+        //DBGPRINTF("count=%d,strlen(%s) = %d\n", count, str, strlen(str));
+        puts(str);
+    }
+    puts("Input a string==========================");
+    gets(str);
+    puts(str);
+    fputs(str, fp);
+    count = 0;
+    rewind(fp);
+    while (fgets(str, STR_SIZE, fp) != NULL) {
+        count++;
+        DBGPRINTF("count=%d,strlen(%s) = %d\n", count, str, strlen(str));
+        puts(str);
+    }
+    //DBGPRINTF("strlen(想) = %d, strlen(!)=%d\n", strlen("想"), strlen("!"));
+#endif
+
+    if (ferror(fp)) {
+        puts("operated fail!\n");
+        //exit(0);
+    }
+    else {
+        puts("operated success!\n");
+    }
 
     fclose(fp);
+
+#if 1//块形式读写文件
+    stu_t stu[N];
+    stu_t stu1[N];
+    if ((fp = fopen("/mnt/hgfs/myProject_toGit_and_for_test_compile/projectOfC/make/grade", "a+")) == NULL) {
+        DBGPRINTF("===========================\n");
+        puts("Fail to open file!");
+        DBGPRINTF("===========================\n");
+        exit(0);
+    }
+    u8 i;
+    for (i = 0; i < N; i++) {
+        scanf("%s %d %d %f", stu[i].name, &stu[i].num, &stu[i].age, &stu[i].score);
+    }
+    fwrite(stu, sizeof(stu_t), N, fp);
+
+    rewind(fp);
+
+    fread(stu1, sizeof(stu_t), N, fp);
+
+    for (i = 0; i < N; i++) {
+        DBGPRINTF("%s %d %d %f\n", stu1[i].name, stu[i].num, stu[i].age, stu[i].score);
+    }
+    
+    fclose(fp);
+#endif
+
     return;
 }
 
+s32 binary_search(s32 key, s32 s[], s32 n)
+{
+    s32 low, high, mid, count = 0, flag = 0;
+    low = 0;
+    high = n - 1;
+    while (low <= high) {
+        count++;
+        DBGPRINTF("count.%d, low.%d, high.%d\n", count, low, high);
+        mid = (low + high) / 2;
+        if (key < s[mid]) {
+            high = mid - 1;
+            //high = mid;
+        } else if (key > s[mid]) {
+            low = mid + 1;
+            //low = mid;
+        } else {
+            DBGPRINTF("search successfully! search %d time(s), s[%d] = %d", count, mid, key);
+            flag = 1;
+            break;
+        }
+    }
+    if (!flag)
+        DBGPRINTF("search fail!");
+    return 0;
+}
+
+void binary_search_test()
+{
+    s32 key;
+    int array[SIZE] = {2, 4, 1, 9, 6, 8, 7, 5, 3, 0};
+    DBGPRINTF("before sorting:\n");
+    print_1d_array(array, SIZE);
+    heap_sort(array, SIZE);
+    DBGPRINTF("after sorted:\n");
+    print_1d_array(array, SIZE);
+    DBGPRINTF("input the num you want search please:\n");
+    scanf("%d", &key);
+    binary_search(key, array, SIZE);
+}
+block_tbl block_table[3];
+s32 block_search(s32 key, s32 s[])//实现分块查找
+{
+    s32 i, j;
+    i = 0;
+    while (i<3 && key>block_table[i].key) {
+        DBGPRINTF("search block idx, key.%d, i.%d\n", key, i);
+        i++;
+    }
+    if (i >= 3) {
+        return -1;
+    }
+
+    j = block_table[i].start;
+    while (j<block_table[i].end && key != s[j]) {
+        DBGPRINTF("search number idx, key.%d, j.%d\n", key, j);
+        j++;
+    }
+
+    if (j >= block_table[i].end) {
+        j = -1;
+    }
+    return j;
+}
+
+void block_search_test()
+{
+    s32 i = 0;
+    s32 key, idx = 0;
+    int array[9] = {2, 4, 1, 9, 6, 8, 7, 5, 3};
+    DBGPRINTF("before sorting:\n");
+    print_1d_array(array, 9);
+    heap_sort(array, 9);
+    DBGPRINTF("after sorted:\n");
+    print_1d_array(array, 9);
+    for (i = 0; i < 3; i++) {
+        block_table[i].start = (9 / 3) * i;
+        block_table[i].end = (9 / 3) * (i+1) - 1;
+        block_table[i].key = array[block_table[i].end];
+    }
+    DBGPRINTF("Input a number you want please:\n");
+    scanf("%d", &key);
+    idx = block_search(key, array);
+    if (idx >= 0)
+        DBGPRINTF("find success!, %d's location is %d\n", key, idx);
+    else
+        DBGPRINTF("find fail!\n");
+}
+u32 get_word_count(char *str)
+{
+    u32 count = 0;
+    u32 idx = 0;
+    u8 word = 0;
+    while (str[idx] != '\0') {
+        if (str[idx] == ' ') {
+            word = 0;
+        } else if (word == 0) {
+            word = 1;
+            count++;
+        }
+        idx++;
+    }
+    return count;
+}
+
+void test_get_word_count()
+{
+    u32 idx=0, count;
+    char str[1000] = {0};
+    /*以字符串为单位处理时，直接使用数组名，无需&           
+    输入字符串时，字符个数要小于数组的长度，例如输入5个字符，定义的字符数组至少应该有6个元素           
+    输入字符串时，遇到回车或空格，输入结束，并且自动在串后面加上结束标志'\0'           
+    输出字符串时,遇到字符串结束标志’\0'，输出结束。
+    */
+    //scanf("%s", str);
+    while ((str[idx] = getchar()) != '\n') {
+        idx++;
+    }
+    DBGPRINTF("the string is \"%s\"\n", str);
+    count = get_word_count(str);
+    DBGPRINTF("%d words in total\n", count);
+}
+
+s32 encrypt_string(const char *srcStr, char *desStr)
+{
+    u32 len = strlen(srcStr);
+    u32 i;
+    for (i = 0; i < len; i++) {
+        desStr[i] = srcStr[i] + i + 5;
+    }
+    desStr[i] = '\0';
+    return len;
+}
+
+s32 decrypt_string(const char *srcStr, char *desStr)
+{
+    u32 len = strlen(srcStr);
+    u32 i;
+    for (i = 0; i < len; i++) {
+        desStr[i] = srcStr[i] - i - 5;
+    }
+    desStr[i] = '\0';
+    return len;
+}
+
+void test_encrypt_and_decrypt()
+{
+    s32 result = 1;
+    char text[128] = {0};
+    char encryptograph[128] = {0};
+    char decryptograph[128] = {0};
+    while (1) {
+        if (result == 1) {
+            DBGPRINTF("Input the text you want encrypt please:\n");
+            scanf("%s", text);
+            encrypt_string(text, encryptograph);
+            DBGPRINTF("the encryption is : %s\n", encryptograph);
+        } else if (result == 2) {
+            decrypt_string(encryptograph, decryptograph);
+            DBGPRINTF("the decryption is : %s\n", decryptograph);
+        } else if (result == 3) {
+            break;
+        } else {
+            DBGPRINTF("Input right cmd symbol please! \n");
+        }
+        DBGPRINTF("1: encrypt  2: decrypt  3: exit system: \n");
+        scanf("%d", &result);
+    }
+}
+
+s32 move(char getone, s32 n, char putone)
+{
+    static s32 k = 1;
+    DBGPRINTF("%2d: %3d # %c ---- %c\n", k, n, getone, putone);
+    if (k++ % 3 == 0)
+        DBGPRINTF("\n");
+    return 0;
+}
+
+s32 hanoi(s32 n, char x, char y, char z)
+{
+    DBGPRINTF("hanoi: n(%d) %C %C %C\n", n, x, y, z);
+    if (n == 1) {
+        move(x, 1, z);
+    } else {
+        hanoi(n-1, x, z, y);
+        //DBGPRINTF("\n");
+        move(x, n, z);
+        hanoi(n-1, y, x, z);
+    }
+    return 0;
+}
+
+void test_hanoi()
+{
+    s32 n;
+    DBGPRINTF("Input the number of disks: ");
+    scanf("%d", &n);
+    DBGPRINTF("\n");
+    hanoi(n, 'A', 'B','C');
+    return;
+}
+s32 josef(s32 a[], s32 n, s32 m)
+{
+    s32 i, j;
+    s32 k = 0;//bug: not set to 0 maybe will have segmentation fault(core dumped)
+    DBGPRINTF("k = %d\n", k);
+    for (i = 0; i < n; i++) {
+        j = 1;
+        //DBGPRINTF("1: j(%d) n(%d) m(%d)\n", j, n, m);
+        while (j < m) {
+            while (a[k] == 0) {
+                k = (k+1) % n;
+            }
+            j++;
+            k = (k+1) % n;
+        }
+        //DBGPRINTF("2: j(%d) n(%d) m(%d)\n", j, n, m);
+        while (a[k] == 0) {
+            k = (k+1) % n;
+        }
+        DBGPRINTF("%d ", a[k]);
+        a[k] = 0;
+    }
+    return 0;
+}
+
+void test_josef()
+{
+    s32 a[100] = {0};
+    s32 i, m, n;
+    u32 b[3][2] = {{0},{0},{0}};
+    DBGPRINTF("sizeof(b[2]) = %d\n", sizeof(b[2]));
+    DBGPRINTF("Input n and m: ");
+    scanf("%d %d", &n, &m);
+    for (i = 0; i < 100; i++) {
+        a[i] = i + 1;
+    }
+    //DBGPRINTF("a[0].%d a[10].%d, a[50].%d\n", a[0], a[10], a[50]);
+    DBGPRINTF("\nOUTPUT:\n");
+    josef(a, n, m);
+    DBGPRINTF("\n");
+    return;
+}
+
+void test_cast_type()
+{
+    u32 value, value1, value2, value3, value4, value5;
+    u8 p0, p1, p2, p3;
+    p0 = 0x12;
+    p1 = 0xfa;
+    p2 = 0x04;
+    p3 = 0x01;
+    DBGPRINTF("p3:%#X p2:%#X p1:%#X p0:%#X\n", p3, p2, p1, p0);
+    value = p0 | (p1 << 8) | (p2 << 16) | (p3 << 24);
+    DBGPRINTF("value = %#X\n", value);
+    
+    value1 = (u32)p0 
+            | (p1 << 8) 
+            | (p2 << 16) 
+            | (p3 << 24);
+    DBGPRINTF("value1 = %#X\n", value1);
+    
+    value2 = (u32)p0 
+            | (u32)(p1 << 8) 
+            | (u32)(p2 << 16) 
+            | (u32)(p3 << 24);
+    DBGPRINTF("value2 = %#X\n", value2);
+
+    u8 offset = 10;
+    value3 = (u32)(p0 + offset) 
+            | (u32)((p1 + offset) << 8) 
+            | (u32)((p2 + offset) << 16) 
+            | (u32)((p3 + offset) << 24);
+    DBGPRINTF("value3 = %#X (offset.%#X)\n", value3, offset);
+    offset = -10;
+    value4 = (u32)(p0 + offset)
+            | (u32)((p1 + offset) << 8) 
+            | (u32)((p2 + offset) << 16) 
+            | (u32)((p3 + offset) << 24);
+    DBGPRINTF("value4 = %#X(offset.%#X)\n", value4, offset);
+
+    offset = 0xff-10;
+    value5 = (u32)(p0 + offset)
+            | (u32)((p1 + offset) << 8) 
+            | (u32)((p2 + offset) << 16) 
+            | (u32)((p3 + offset) << 24);
+    DBGPRINTF("value5 = %#X(offset.%#X)\n", value5, offset);
+
+
+    u8 idx = 0;
+    for (idx = 0; idx < 10; idx+=3) {
+        if (idx < 3) {
+            DBGPRINTF("idx(%d) < 3\n", idx);
+        } else if (idx < 6) {
+            DBGPRINTF("idx(%d) < 6\n", idx);
+        } else if (idx < 10) {
+            DBGPRINTF("idx(%d) < 10\n", idx);
+        } else {
+            ASSERT(0);
+        }
+    }
+    
+}
+
+__attribute__((weak)) u32 strong_weak_symbol = 20;
+
+__attribute__((weak)) void strong_weak_symb_func()
+{
+    DBGPRINTF("call func strong_weak_symb_func in test.c\n");
+}
+
+void test_strong_weak_symb()
+{
+    DBGPRINTF("strong_weak_symbol = %d\n", strong_weak_symbol);
+    strong_weak_symb_func();
+}
+/*统计一个字符在一个字符串中出现的次数*/
+s32 strnchr(const char* str, char ch)
+{
+    s32 i, n = 0, len = strlen(str);
+    for (i = 0; i < len; i++) {
+        if (ch == str[i])
+            n++;
+    }
+    return n;
+}
+void test_const()
+{
+    s32 count = 0;
+    char string[20] = "I love you!";
+    count = strnchr(string, 'o');
+    string[0] = 'i';
+    DBGPRINTF("string = %s, o appears %d times in the string\n", string, count);
+}
+
+void test_scanf()
+{
+    s8 c;
+    s8 i;//这样i的地址在c的后面，且是连续的，就会出错，如果是i为s32类型，就不会有问题，因为c的后面会空3个字节,另外如果c地址在i后面也不会有问题
+    //s32 i;//这样c的可能把i的值踩了，编译器不同可能结果不一样
+    DBGPRINTF("ptr_i.%p ptr_c.%p\n", &i, &c);
+    for (i = 0; i < 5; i++) {
+        scanf("%d", &c);//用整型接收char型
+        DBGPRINTF("i= %d\n", i);
+    }
+}
+
+void test_print_type()
+{
+    float f = 2.0;
+    DBGPRINTF("f.%f = d.%d\n", f, f);
+    f = 2.1;
+    DBGPRINTF("f.%f = d.%d\n", f, f);
+    f = 2.0;
+    DBGPRINTF("f.%f = d.%d\n", f, (u32)f);
+    f = 2.1;
+    DBGPRINTF("f.%f = d.%d\n", f, (u32)f);
+
+    u8 a = 0x100-10;
+    u8 b = 0;
+    u32 c = (0x10 << 16) | (a + b);
+    u32 d = (0x10 << 16) | (b + a/3);
+    DBGPRINTF("c(%d+%d)=0x%x d(%d+%d/3)=0x%x\n", a, b, c, a, b, d);
+    u8 e = 0xff;
+    u32 h = e;
+    u32 g = (s32)e;
+    DBGPRINTF("e.%#x(%d), f.%#x(%d), g.%#x(%d)\n", e, e, h, h, g, g);
+}
+
+void test_shift_operation()
+{
+    s32 org = -1;
+    s32 div = org / 2;
+    s32 shift = org >> 1;
+    DBGPRINTF("org.%d, div.%d, shift.%d\n", org, div, shift);
+
+    s32 a, b, q, r;//a除以b,q为商,r为余数
+    a = -3;
+    b = 2;
+    q = a/b;
+    r = a%b;
+    DBGPRINTF("a=%d, b=%d, %d/%d=%d, %d%%%d=%d\n", a, b, a, b, q, a, b, r);//输出%要用%%
+    
+    s32 random;
+    srand((u32)time(NULL));
+    random = rand();
+    DBGPRINTF("random = %d\n", random);
+
+    //char *p;
+    //p = NULL;
+    //DBGPRINTF("location 0 contains %d\n", *p);
+}
+
+void print_func(char c)
+{
+    DBGPRINTF("%c", c);
+}
+
+void print_num(long n, void (*pfunc)(char))
+{
+    if (n < 0) {
+        pfunc('-');
+        //(*pfunc)('-');
+        n = -n;
+    }
+
+    if (n >= 10)
+        print_num(n/10, pfunc);
+
+    (*pfunc)((char)(n%10) + '0');//(*pfunc)("0123456789"[n%10])//增加可移植性,避免某些机器数字字符不是连续的情况
+}
+
+void test_print_num()
+{
+    //char buf[1024];
+    //setbuf(stdout, buf);
+    DBGPRINTF("test print num:\n");
+    print_num(-1234349, print_func);
+    DBGPRINTF("\n");
+    //fflush(stdout);
+}
+/*将十六进制转换为数字*/
+long atox(char *s)
+{
+#if 1
+    char xdigs[] = "0123456789ABCDEF";
+#endif
+    long sum;
+    /*跳过空格*/
+    while (isspace(*s)) {
+        ++s;
+    }
+    /*做变换*/
+    for (sum = 0L; isxdigit(*s); ++s) {
+#if 1
+        int digit = strchr(xdigs, toupper(*s)) - xdigs;
+#else
+        int digit;
+        if (isdigit(*s))
+            digit = *s -'0';
+        else
+            digit = toupper(*s) - 'A' + 10;
+#endif
+        sum = sum * 16L + digit;
+    }
+
+    return sum;
+}
+long atox_simple(char *s)
+{
+    long n = 0L;
+    sscanf(s, "%lx", &n);
+    return n;
+}
+
+long atox_best(char *s)
+{
+    return strtol(s, NULL, 16);
+}
+
+void test_atox()
+{
+    char s[20] = "12a";//"3a0x0";
+    long num, num1, num2;
+    num = atox(s);
+    num1 = atox_simple(s);
+    num2 = atox_best(s);
+    DBGPRINTF("s.%s num.%d num1.%d, num2.0x%x\n", s, num, num1, num2);
+    
+}
+//#define BUFSIZ 8192
+int copy(FILE *dest, FILE *source)
+{
+    s32 count;
+    static char buf[BUFSIZ];
+#if 1
+    while (!feof(source)) {
+        count = fread(buf, 1, BUFSIZ, source);
+        if (ferror(source))
+            return EOF;
+        if (fwrite(buf, 1, count, dest) != count)
+            return EOF;
+    }
+#else
+    while (count = fread(buf, 1, BUFSIZ, source) > 0) {
+        fwrite(buf, 1, BUFSIZ, dest);
+    }
+#endif
+    DBGPRINTF("BUFSIZ = %d\n", BUFSIZ);
+    return 0;
+}
+
+s32 copy_file(char *file_read, char *file_write)
+{
+    FILE *fp_read;
+    FILE *fp_write;
+    if ((fp_read = fopen(file_read, "rb")) == NULL 
+        || (fp_write = fopen(file_write, "ab+")) == NULL) {//以追加的方式打开文件
+
+        DBGPRINTF("can not open file, press any key to exit\n");
+        getchar();
+        exit(1);
+    }
+
+    if (copy(fp_write, fp_read)) {
+        DBGPRINTF("copy fail\n");
+    }
+
+    fclose(fp_read);
+    fclose(fp_write);
+    return 1;
+}
+
+void test_file_copy()
+{
+    char *file_read = "tonghaitao.txt";
+    char *file_write = "tonghaitao1.txt";
+    DBGPRINTF("start copy file %s to %s\n", file_read, file_write);
+    copy_file(file_read, file_write);
+    puts("copy file done!");
+}
+
+typedef struct _month {
+    int nr;
+    char *name;
+} month_t;
+
+month_t months[] = {
+           { 1, "jan" }, { 2, "feb" }, { 3, "mar" }, { 4, "apr" },
+           { 5, "may" }, { 6, "jun" }, { 7, "jul" }, { 8, "aug" },
+           { 9, "sep" }, {10, "oct" }, {11, "nov" }, {12, "dec" }
+       };
+
+
+#define nr_of_months (sizeof(months) / sizeof(month_t))
+//compare by month name
+static int cmp_month(const void *m1, const void *m2)
+{
+    s32 ret = 0;
+    month_t *mi1 = m1;
+    month_t *mi2 = m2;
+    ret = strcmp(mi1->name, mi2->name);
+    DBGPRINTF("ret.%d mi1->name(%s) mi2->name(%s)\n", ret, mi1->name, mi2->name);
+    return ret;
+}
+//compare by month nr
+static int cmp_month_nr(const void *m1, const void *m2)
+{
+    s32 ret = 0;
+    month_t *mi1 = m1;
+    month_t *mi2 = m2;
+    ret = mi1->nr - mi2->nr;
+    return ret;
+}
+void test_month()
+{
+    s32 i;
+    char str[10];
+#if 0//by month name
+    qsort(months, nr_of_months, sizeof(month_t), cmp_month);
+#else//by month nr
+    qsort(months, nr_of_months, sizeof(month_t), cmp_month_nr);
+#endif
+    for (i = 0; i < nr_of_months; i++) {
+        DBGPRINTF("nr.%d, name.%s\n", months[i].nr, months[i].name);
+    }
+    for (i = 1; i < 2; i++) {
+        month_t key, *res;
+#if 0//by month name
+        scanf("%s", str);
+        key.name = str;
+        res = bsearch(&key, months, nr_of_months, sizeof(month_t), cmp_month);
+#else//by month nr
+        s32 month_nr;
+        scanf("%d", &month_nr);
+        key.nr = month_nr;
+        res = bsearch(&key, months, nr_of_months, sizeof(month_t), cmp_month_nr);
+#endif
+        if (res == NULL) {
+            DBGPRINTF("%s: unkonwn month\n", str);
+        } else {
+            DBGPRINTF("%s: month #%d\n", res->name, res->nr);
+        }
+    }
+    DBGPRINTF("EXIT_SUCCESS.%d, EIXT_FAILURE.%d, RAND_MAX.%lld, MB_CUR_MAX.%lld\n", 
+        EXIT_SUCCESS, EXIT_FAILURE, (u64)RAND_MAX, (u64)MB_CUR_MAX);
+    exit(EXIT_SUCCESS);
+}
+
+static int cmpstringp(const void *p1, const void *p2)
+{
+    /*The actual arguments to this function are "pointers to
+              pointers to char", but strcmp(3) arguments are "pointers
+              to char", hence the following cast plus dereference*/
+    return strcmp(*(char * const *)p1, *(char * const *)p1);
+}
+#define DECKSIZE 52
+#define SUITSIZE 13
+void test_auto_deal()
+{
+    u32 ncards = DECKSIZE;
+    char deck[DECKSIZE];
+    u32 deckp;
+    u32 seed;
+
+    seed = (unsigned int)time(NULL);
+    srand(seed);
+
+    /*洗牌*/
+    deckp = 0;
+    while (deckp < ncards) {
+        u32 num = rand() % DECKSIZE;
+        if (memchr(deck, num, deckp) == NULL)//在前面deckp个byte查找num，如果没找到就返回NULL
+            deck[deckp++] = (char)num;
+    }
+
+    /*发牌*/
+    for (deckp = 0; deckp < ncards; ++deckp) {
+        div_t card = div(deck[deckp], SUITSIZE);
+        DBGPRINTF("%c(%c)%c",
+                    "A123456789TJQK"[card.rem],
+                    "CDHS"[card.quot],//0:clubs(梅花) 1:diamonds(方块) 2:hearts(红心) 3:spades(黑桃)
+                    (deckp+1) % SUITSIZE ? ' ' : '\n');
+    }
+}
+
+
+void test_strtol()
+{
+    char *input = "101 213 45678 901a3b z";
+    char *nextp = input;
+    long bin, oct, dec, hex, beyond;
+    DBGPRINTF("nextp.%p\n", nextp);
+    bin = strtol(nextp, &nextp, 2);
+    DBGPRINTF("nextp.%p bin.%ld\n", nextp, bin);
+    oct = strtol(nextp, &nextp, 8);
+    DBGPRINTF("nextp.%p oct.%#lo\n", nextp, oct);
+    dec = strtol(nextp, &nextp, 10);
+    DBGPRINTF("nextp.%p dec.%ld\n", nextp, dec);
+    hex = strtol(nextp, &nextp, 16);
+    DBGPRINTF("nextp.%p hex.%#lx\n", nextp, hex);
+    beyond = strtol(nextp, &nextp, 36);
+    DBGPRINTF("nextp.%p beyond.%ld\n", nextp, beyond);
+}
+char *strtok_copy(char *s, const char *delim)
+{
+    const char *spanp;
+    int c, sc;
+    char *tok;
+    static char *last;
+    if (s == NULL && (s = last) == NULL)
+        return NULL;
+    /*skip(span) leading delimiters(s += strspn(s, delim), sort of)*/
+    /*跳过字符串首部的分隔符*/
+cont:
+    c = *s++;
+    for (spanp = delim; (sc = *spanp++) != 0; ) {
+        if (c == sc)
+            goto cont;
+    }
+
+    if (c == 0) {
+        last = NULL;
+        return NULL;
+    }
+    tok = s - 1;/*分隔符后面还有字符串，将tok指向字符串首部(不包括分隔符)*/
+    
+    /*循环字符串中的字符，直到找到分隔符或者结束符，并替换成结束符*/
+    for (;;) {
+        c = *s++;
+        spanp = delim;
+        do {
+            if ((sc = *spanp++) == c) {
+                if (c == 0)
+                    s = NULL;
+                else
+                    s[-1] = 0;
+                last = s;
+                return (tok);
+            }
+        } while (sc != 0);
+    }
+}
+void test_strtok()
+{
+    char *str = "a b bbc de";//元素值不可变
+    char *t;//定义一个新指针，可以改变其中元素的值
+    char *delimiter = " b";//定界符
+    int i;
+    int numtoken;//存储分割元素的个数
+    char **p;//存储分割的字符串
+
+    t = malloc(strlen(str) + 1);//由于strlen不计算'\0'，所以所求字符串长度需要加1
+    printf("len_of_str: %d\n", strlen(str));
+    strcpy(t, str);
+
+    //计数
+    if (strtok_copy(t, delimiter) != NULL)
+        for (numtoken = 1;strtok_copy(NULL, delimiter) != NULL; numtoken++);
+
+    printf("numtoken:%d\n", numtoken);
+
+    //为二重指针分配空间
+    p = malloc(sizeof(char *) * numtoken + 1);
+
+    strcpy(t, str);
+    printf("t: %s\n", t);
+
+    //赋值
+    *p = strtok_copy(t, delimiter);
+    for (i = 1; i < numtoken; i++) {
+            p[i] = strtok_copy(NULL, delimiter);
+    }
+
+    //打印
+    for (i = 0; i < numtoken; i++) {
+        printf("%d str:%s\n", i, p[i]);
+    }
+}
+static jmp_buf buf;
+void second()
+{
+    DBGPRINTF("second!!!\n");
+    longjmp(buf, 0);
+}
+void first()
+{
+    second();
+    DBGPRINTF("first!!!\n");
+}
+void test_longjmp_setjmp()
+{
+    if (!setjmp(buf)) {
+        first();
+    } else {
+        DBGPRINTF("main\n");
+    }
+}
+u32 calc_sum_by_var_args(u32 count, ...)
+{
+    
+    u32 sum = 0;
+    va_list args;
+    va_start(args, count);
+    while (count--) {
+        u32 num;
+        //num = va_arg(args, int);
+        //sum += num;
+        sum += va_arg(args, int);
+        DBGPRINTF("count.%d num.%d sum.%d\n", count, num, sum);
+    }
+    va_end(args);
+    return sum;
+}
+
+void test_va_list()
+{
+    u32 sum0, sum1, sum2 = 0;
+    sum0 = calc_sum_by_var_args(3, 20, 30, 40);
+    sum1 = calc_sum_by_var_args(2, 20, 30);
+    sum2 = calc_sum_by_var_args(4, 20, 30, 40, 40);
+    DBGPRINTF("sum0.%d, sum1.%d, sum2.%d\n", sum0, sum1, sum2);
+}
+/*建立回传字符串的函数*/
+s32 prepend(char *buf, u32 offset, char *new_str)
+{
+    s32 new_len = strlen(new_str);
+    s32 new_start = offset - new_len;
+
+    /*将字符串压栈到另一个的前面*/
+    if (new_start >= 0)
+        memcpy(buf+new_start, new_str, new_len);
+        
+    return new_start;
+}
+s32 preprintf(char *buf, u32 offset, char *format, ...)
+{
+    s32 pos = offset;
+    char *temp = malloc(BUFSIZ);
+
+    /*格式化，然后压栈*/
+    if (temp)
+    {
+        va_list args;
+        va_start(args, format);
+        vsprintf(temp, format, args);
+        pos = prepend(buf, offset, temp);
+        va_end(args);
+        free(temp);
+    }
+    return pos;
+}
+
+#define BASE 10
+#define GROUP 3
+#define MAXTEXT 14 /*BASE = 10*/
+
+char *commas(u64 amount)
+{
+    short offset = MAXTEXT - 1, place;
+    static char text[MAXTEXT];
+
+    text[offset] = '\0';
+
+    /*用逗号从右向左压栈数字*/
+    for (place = 0; amount > 0; ++place) {
+        if (place % GROUP == 0 && place > 0) {
+            offset = prepend(text, offset, ",");
+        }
+        offset = preprintf(text, offset, "%x", amount % BASE);
+        amount /= BASE;
+    }
+
+    return (offset >= 0) ? text + offset : NULL;
+}
+
+void test_commas()
+{
+    puts(commas(1));
+    puts(commas(12));
+    puts(commas(123));
+    puts(commas(1234));
+    puts(commas(12345));
+    puts(commas(123456));
+    puts(commas(1234567));
+    puts(commas(12345678));
+    puts(commas(123456789));
+    puts(commas(1234567890));
+}
+
+#define NBYTES 16
+void dump(FILE *f, char *s)
+{
+    u8 buf[NBYTES];
+    s32 count;
+    s64 size = 0L;
+    DBGPRINTF("dump of %s: \n\n", s);
+
+    while ((count = fread(buf, 1, NBYTES, f)) > 0) {
+        /* 打印字节计数器 */
+        DBGPRINTF(" %06X ", size += count);
+
+        /* 打印16进制字节 */
+        for (int i = 0; i < NBYTES; i++) {
+            /* 在列之间打印装订线间距 */
+            if (i == NBYTES/2)
+                putchar(' ');
+            /* 显示16进制字节 */
+            if (i < count) {
+                DBGPRINTF(" %02X ", buf[i]);
+                if (!(isprint(buf[i]))) {
+                    buf[i] = '.';
+                }
+            } else {
+                /* 为最后一行的部分留间隔 */
+                fputs(" ", stdout);
+                buf[i] = ' ';
+            }
+        }
+
+        /* 打印文本字节 */
+        DBGPRINTF(" |%16.16s|\n", buf);
+    }
+}
+
+int test_dump(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        FILE *f;
+        if ((f = fopen(argv[i], "rb")) == 0) {
+            DBGPRINTF("can't open file\n");
+        } else {
+            dump(f, argv[i]);
+            fclose(f);
+            putchar('\f');
+        }
+    }
+
+    return 0;
+}
+
 //c语言入门编程练习
-void test1()
+void test1(int argc, char *argv[])
 {
     print_compile_info();
     //ASSERT(FALSE);
@@ -2137,6 +3272,29 @@ void test1()
     //compare_two_fraction();//比较两个分数的大小(通过公分母进行)
     //two_dimensional_array_test();//二维数组的大小、声明和使用
     //test_rand_func();//测试随机数生成
-    open_file_test();//测试文件打开、关闭、操作
+    //sort_method_test();//测试排序函数
+    //open_file_test();//测试文件打开、关闭、操作
+    //binary_search_test();//二分法查找
+    //block_search_test();//块查找
+    //test_get_word_count();//统计单词个数
+    //test_encrypt_and_decrypt();//加解密测试
+    //test_hanoi();//汉诺塔问题
+    //test_josef();//约瑟夫环问题
+    //test_cast_type();//测试移位操作及强转操作
+    //test_strong_weak_symb();//测试强弱符号
+    //test_const();//测试const关键字
+    //test_scanf();//测试scanf函数接收不对的数据类型
+    //test_print_type();//测试打印类型
+    //test_shift_operation();
+    //test_print_num();
+    //test_atox();//测试字符串转16进制数
+    //test_file_copy();//测试文件复制
+    //test_month();//测试库函数qsort和bsearch(stdlib.h)
+    //test_auto_deal();//分离随机数和整数除法的洗牌程序
+    //test_strtol();
+    //test_strtok();//根据分割符分割字符串
+    //test_longjmp_setjmp();
+    //test_va_list();
+    //test_commas();//将数字转换成具有逗号分隔符的字符串
+    test_dump(argc, argv);//十六进制/ASCII转储程序
 }
-
